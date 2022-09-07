@@ -27,7 +27,7 @@ def get_argparser():
     # Datset Options
     parser.add_argument("--data_root", type=str, default='./datasets/data',
                         help="path to Dataset")
-    parser.add_argument("--dataset", type=str, default='voc',
+    parser.add_argument("--dataset", type=str, default='gen_seg',
                         choices=['voc', 'cityscapes', 'gen_seg'], help='Name of dataset')
     parser.add_argument("--num_classes", type=int, default=None,
                         help="num classes (default: None)")
@@ -315,7 +315,14 @@ def main():
     if opts.ckpt is not None and os.path.isfile(opts.ckpt):
         # https://github.com/VainF/DeepLabV3Plus-Pytorch/issues/8#issuecomment-605601402, @PytaichukBohdan
         checkpoint = torch.load(opts.ckpt, map_location=torch.device('cpu'))
-        model.load_state_dict(checkpoint["model_state"])
+        state_dict = {}
+        for k, v in checkpoint["model_state"].items():
+            if v.size() != model.state_dict()[k].size():
+                state_dict[k] = v[:model.state_dict()[k].size()[0], ...]
+            else:
+                state_dict[k] = v
+
+        model.load_state_dict(state_dict)
         model = nn.DataParallel(model)
         model.to(device)
         if opts.continue_training:

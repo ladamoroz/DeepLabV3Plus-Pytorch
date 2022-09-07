@@ -41,14 +41,13 @@ class GenSegmentation(data.Dataset):
         self.transform = transform
         
         self.image_set = image_set
-        base_dir = ''
-        gen_root = os.path.join(self.root, base_dir)
+        gen_root = self.root
 
         image_dir = os.path.join(gen_root, f'{image_set}/images')
         mask_dir = os.path.join(gen_root, f'{image_set}/masks')
         
-        self.images = [os.path.join(image_dir, x.split('.')[0]+'.jpg') for x in os.listdir(image_dir)]
-        self.masks = [os.path.join(mask_dir, x.split('.')[0]+'.png') for x in os.listdir(image_dir)]
+        self.images = [os.path.join(image_dir, x[:-4]+'.jpg') for x in os.listdir(image_dir)]
+        self.masks = [os.path.join(mask_dir, x[:-4]+'.png') for x in os.listdir(image_dir)]
         assert (len(self.images) == len(self.masks))
 
     def __getitem__(self, index):
