@@ -40,7 +40,7 @@ class StreamSegMetrics(_StreamMetrics):
     def to_str(results):
         string = "\n"
         for k, v in results.items():
-            v = str(v)
+            v = str(np.around(v, decimals=3))
             string += "%s: %s\n"%(k, v)
 
         return string
