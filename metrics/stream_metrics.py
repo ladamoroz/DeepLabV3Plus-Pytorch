@@ -1,5 +1,7 @@
 import numpy as np
+import seaborn as sns
 from sklearn.metrics import confusion_matrix
+import matplotlib.pyplot as plt
 
 class _StreamMetrics(object):
     def __init__(self):
@@ -38,8 +40,9 @@ class StreamSegMetrics(_StreamMetrics):
     def to_str(results):
         string = "\n"
         for k, v in results.items():
-            if k!="Class IoU":
-                string += "%s: %f\n"%(k, v)
+            v = str(v)
+            string += "%s: %s\n"%(k, v)
+
         return string
 
     def _fast_hist(self, label_true, label_pred):
@@ -57,30 +60,27 @@ class StreamSegMetrics(_StreamMetrics):
             - mean IU
             - fwavacc
         """
-        print(self.confusion_matrix.shape)
         hist = self.confusion_matrix
         acc = np.diag(hist).sum() / hist.sum()
-        acc_cls_by_class = np.diag(hist) / hist.sum(axis=1)
-        acc_cls = np.nanmean(acc_cls_by_class)
+        acc_cls = np.diag(hist) / hist.sum(axis=1)
+        mean_acc = np.nanmean(acc_cls)
         iu = np.diag(hist) / (hist.sum(axis=1) + hist.sum(axis=0) - np.diag(hist))
         mean_iu = np.nanmean(iu)
         freq = hist.sum(axis=1) / hist.sum()
         fwavacc = (freq[freq > 0] * iu[freq > 0]).sum()
         cls_iu = dict(zip(range(self.n_classes), iu))
-        print("By class metrics", acc_cls_by_class[:-1])
 
         return {
                 "Overall Acc": acc,
-                "Mean Acc": acc_cls,
-                "FreqW Acc": fwavacc,
+                "Mean Acc": mean_acc,
                 "Mean IoU": mean_iu,
-                "Class IoU": cls_iu,
-                
+                "By class IoU": iu,
+                "By class Acc": acc_cls 
             }
         
     def reset(self):
         self.confusion_matrix = np.zeros((self.n_classes, self.n_classes))
-
+       
 class AverageMeter(object):
     """Computes average values"""
     def __init__(self):
