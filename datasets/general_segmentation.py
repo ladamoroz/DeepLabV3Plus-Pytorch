@@ -13,13 +13,13 @@ from torchvision.datasets.utils import download_url
 def gen_cmap(N=256, normalized=False):
     dtype = "float32" if normalized else "uint8"
     cmap = np.zeros((N, 3), dtype=dtype)
-    cmap[1:6] = np.array(
+    cmap[1:4] = np.array(
         [
-            [166, 166, 166],
-            [254, 149, 115],
-            [90, 123, 255],
-            [57, 248, 248],
-            [255, 247, 62],
+            [166, 166, 166], # snow
+            [254, 149, 115], # dirt
+            # [90, 123, 255], # ice
+            # [57, 248, 248], # water 
+            [255, 247, 62], # vehicle
         ]
     )
     cmap = cmap / 255 if normalized else cmap
@@ -49,10 +49,10 @@ class GenSegmentation(data.Dataset):
         mask_dir = os.path.join(gen_root, f"{image_set}/masks")
 
         self.images = [
-            os.path.join(image_dir, x[:-4] + ".jpg") for x in os.listdir(image_dir)
+            os.path.join(image_dir, x) for x in os.listdir(image_dir)
         ]
         self.masks = [
-            os.path.join(mask_dir, x[:-4] + ".png") for x in os.listdir(image_dir)
+            os.path.join(mask_dir, os.path.splitext(x)[0] + '.png') for x in os.listdir(image_dir)
         ]
         assert len(self.images) == len(self.masks)
 
